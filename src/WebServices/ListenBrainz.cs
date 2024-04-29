@@ -3,6 +3,7 @@
     internal class ListenBrainz
     {
         private static string baseUrl = "https://api.listenbrainz.org";
+
         public static async Task<dynamic> GetListens(string username, string token,
             long? minTs = null, long? maxTs = null, int? count = null)
         {

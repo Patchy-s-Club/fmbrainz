@@ -1,14 +1,15 @@
 ﻿using Newtonsoft.Json;
+
 namespace fmbrainz
 {
     internal class LastFm
     {
         private static readonly HttpClient client = new HttpClient();
-        
+
         // TODO: Move to configuration file
         private static string token = "x";
         private static string secret = "x";
-        
+
         private static string baseUrl = "http://ws.audioscrobbler.com/2.0/?";
 
         public static async Task<dynamic> GetArtistInfo(string artistName)
@@ -37,7 +38,5 @@ namespace fmbrainz
             dynamic userInfo = await HttpService.GetResponse<dynamic>(token, requestUrl);
             return userInfo;
         }
-
-
     }
 }

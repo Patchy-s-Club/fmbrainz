@@ -7,7 +7,9 @@ namespace fmbrainz
     internal class HttpService
     {
         private static readonly HttpClient client = new HttpClient();
-        public static async Task<T> GetResponse<T>(string token, string url, Dictionary<string, string> ?parameters = null)
+
+        public static async Task<T> GetResponse<T>(string token, string url,
+            Dictionary<string, string>? parameters = null)
         {
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("api_key", token);
 
@@ -24,7 +26,5 @@ namespace fmbrainz
 
             return data;
         }
-
-
     }
 }

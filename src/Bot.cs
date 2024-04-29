@@ -11,15 +11,16 @@ namespace fmbrainz
     {
         private static readonly HttpClient client = new HttpClient();
         private static DiscordSocketClient _client = new();
-        
+
         private static List<Command> commands = new List<Command>()
         {
             new GetUserCommand(),
+            new GetArtistCommand(),
+            new GetUserTracks(),
         };
-        
+
         public static async Task Main()
         {
-            
             _client.Log += Log;
             _client.Ready += Client_Ready;
             _client.SlashCommandExecuted += SlashCommandHandler;
@@ -34,12 +35,13 @@ namespace fmbrainz
             // Block this task until the program is closed.
             await Task.Delay(-1);
         }
-        
+
         private static Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
             return Task.CompletedTask;
         }
+
         private static async Task Client_Ready()
         {
             try
@@ -49,12 +51,14 @@ namespace fmbrainz
                     var builder = new SlashCommandBuilder()
                         .WithName(command.Name)
                         .WithDescription(command.Description);
-                    
+
                     foreach (var option in command.Options)
                     {
                         builder.AddOption(option);
                     }
+
                     await _client.Rest.CreateGlobalCommand(builder.Build());
+                    Console.WriteLine($"Command {command.Name} has been registered.");
                 }
             }
             catch (HttpException exception)
@@ -63,6 +67,7 @@ namespace fmbrainz
                 Console.WriteLine(json);
             }
         }
+
         private static async Task SlashCommandHandler(SocketSlashCommand command)
         {
             switch (command.CommandName)
@@ -75,7 +80,11 @@ namespace fmbrainz
                     var artist = await LastFm.GetArtistInfo((string)command.Data.Options.First().Value);
                     await command.RespondAsync(embed: EmbedResponse.GetArtistInfo(artist));
                     break;
-            } 
+                case "gettracks":
+                    var userTracks = await LastFm.GetUserTracks((string)command.Data.Options.First().Value);
+                    await command.RespondAsync(embed: EmbedResponse.GetListens(userTracks));
+                    break;
+            }
         }
     }
 }

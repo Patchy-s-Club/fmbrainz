@@ -9,5 +9,4 @@ public abstract class Command
     public abstract string Description { get; }
     public abstract List<SlashCommandOptionBuilder> Options { get; }
     public abstract Task ExecuteAsync(SocketSlashCommand message);
-    
 }
