@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Net;
 using Discord.WebSocket;
+using fmbrainz.Commands;
 using Newtonsoft.Json;
 
 
@@ -9,11 +10,16 @@ namespace fmbrainz
     class Bot
     {
         private static readonly HttpClient client = new HttpClient();
-
         private static DiscordSocketClient _client = new();
-
+        
+        private static List<Command> commands = new List<Command>()
+        {
+            new GetUserCommand(),
+        };
+        
         public static async Task Main()
         {
+            
             _client.Log += Log;
             _client.Ready += Client_Ready;
             _client.SlashCommandExecuted += SlashCommandHandler;
@@ -28,7 +34,7 @@ namespace fmbrainz
             // Block this task until the program is closed.
             await Task.Delay(-1);
         }
-
+        
         private static Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
@@ -36,22 +42,20 @@ namespace fmbrainz
         }
         private static async Task Client_Ready()
         {
-            var a = new SlashCommandBuilder()
-                .WithName("getuser")
-                .WithDescription("Get user.")
-                .AddOption("user", ApplicationCommandOptionType.String, "The user", isRequired: true)
-                .Build();
-
-            var b = new SlashCommandBuilder()
-                .WithName("getartist")
-                .WithDescription("Get artist.")
-                .Build();
-
             try
             {
-                await _client.CreateGlobalApplicationCommandAsync(a);
-                await _client.CreateGlobalApplicationCommandAsync(b);
-
+                foreach (var command in commands)
+                {
+                    var builder = new SlashCommandBuilder()
+                        .WithName(command.Name)
+                        .WithDescription(command.Description);
+                    
+                    foreach (var option in command.Options)
+                    {
+                        builder.AddOption(option);
+                    }
+                    await _client.Rest.CreateGlobalCommand(builder.Build());
+                }
             }
             catch (HttpException exception)
             {
@@ -65,10 +69,13 @@ namespace fmbrainz
             {
                 case "getuser":
                     var user = await LastFm.GetUserInfo((string)command.Data.Options.First().Value);
-                    await command.RespondAsync(user.user.name);
+                    await command.RespondAsync(embed: EmbedResponse.GetUserInfo(user));
+                    break;
+                case "getartist":
+                    var artist = await LastFm.GetArtistInfo((string)command.Data.Options.First().Value);
+                    await command.RespondAsync(embed: EmbedResponse.GetArtistInfo(artist));
                     break;
             } 
-
         }
     }
 }
