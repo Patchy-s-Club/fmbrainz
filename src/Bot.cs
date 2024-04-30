@@ -7,16 +7,15 @@ using Newtonsoft.Json;
 
 namespace fmbrainz
 {
-    class Bot
+    static class Bot
     {
         private static readonly HttpClient client = new HttpClient();
         private static DiscordSocketClient _client = new();
 
         private static List<Command> commands = new List<Command>()
         {
-            new GetUserCommand(),
-            new GetArtistCommand(),
-            new GetUserTracks(),
+            new lfm(),
+            new lb()
         };
 
         public static async Task Main()
@@ -57,6 +56,7 @@ namespace fmbrainz
                         builder.AddOption(option);
                     }
 
+                    await _client.Rest.DeleteAllGlobalCommandsAsync();
                     await _client.Rest.CreateGlobalCommand(builder.Build());
                     Console.WriteLine($"Command {command.Name} has been registered.");
                 }
@@ -70,21 +70,16 @@ namespace fmbrainz
 
         private static async Task SlashCommandHandler(SocketSlashCommand command)
         {
-            switch (command.CommandName)
+            var commandName = command.Data.Name;
+            var commandToExecute = commands.FirstOrDefault(c => c.Name == commandName);
+
+            if (commandToExecute != null)
             {
-                case "getuser":
-                    var user = await LastFm.GetUserInfo((string)command.Data.Options.First().Value);
-                    await command.RespondAsync(embed: EmbedResponse.GetUserInfo(user));
-                    break;
-                case "getartist":
-                    var artist = await LastFm.GetArtistInfo((string)command.Data.Options.First().Value);
-                    await command.RespondAsync(embed: EmbedResponse.GetArtistInfo(artist));
-                    break;
-                case "gettracks":
-                    var userTracks = await LastFm.GetUserTracks((string)command.Data.Options.First().Value);
-                    await command.RespondAsync(embed: EmbedResponse.GetListens(userTracks));
-                    break;
+                await commandToExecute.ExecuteAsync(command);
             }
-        }
-    }
+            else
+            {
+                await command.RespondAsync("Unknown command.");
+            }
+        }    }
 }

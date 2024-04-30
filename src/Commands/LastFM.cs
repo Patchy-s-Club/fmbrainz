@@ -1,65 +1,56 @@
 using Discord;
 using Discord.WebSocket;
+using fmbrainz.WebServices;
 
 namespace fmbrainz.Commands;
 
-public class GetUserCommand : Command
+public class lfm : Command
 {
-    public override string Name => "getuser";
-    public override string Description => "Get user.";
+    public override string Name => "lfm";
+    public override string Description => "Parent lfm group.";
 
     public override List<SlashCommandOptionBuilder> Options =>
     [
         new SlashCommandOptionBuilder()
-            .WithName("username")
-            .WithDescription("The username of the user.")
-            .WithType(ApplicationCommandOptionType.String)
-            .WithRequired(true)
-    ];
-
-    public override async Task ExecuteAsync(SocketSlashCommand command)
-    {
-        var user = await LastFm.GetUserInfo((string)command.Data.Options.First().Value);
-        await command.RespondAsync(embed: EmbedResponse.GetUserInfo(user));
-    }
-}
-
-public class GetArtistCommand : Command
-{
-    public override string Name => "getartist";
-    public override string Description => "Get artist.";
-
-    public override List<SlashCommandOptionBuilder> Options =>
-    [
+            .WithName("getuser")
+            .WithDescription("Get user.")
+            .WithType(ApplicationCommandOptionType.SubCommand)
+            .AddOption("username", ApplicationCommandOptionType.String, "The username of the user.", true)
+            .WithRequired(false),
         new SlashCommandOptionBuilder()
-            .WithName("artist")
-            .WithDescription("The name of the artist.")
-            .WithType(ApplicationCommandOptionType.String)
-            .WithRequired(true)
-    ];
-
-    public override async Task ExecuteAsync(SocketSlashCommand command)
-    {
-        var artist = await LastFm.GetArtistInfo((string)command.Data.Options.First().Value);
-        await command.RespondAsync(embed: EmbedResponse.GetArtistInfo(artist));
-    }
-}
-
-public class GetUserTracks : Command
-{
-    public override string Name => "gettracks";
-    public override string Description => "Get user tracks.";
-    public override List<SlashCommandOptionBuilder> Options =>
-    [
+            .WithName("getartist")
+            .WithDescription("Get artist.")
+            .WithType(ApplicationCommandOptionType.SubCommand)
+            .AddOption("artist", ApplicationCommandOptionType.String, "The name of the artist.", true)
+            .WithRequired(false),
         new SlashCommandOptionBuilder()
-            .WithName("username")
-            .WithDescription("The username of the user.")
-            .WithType(ApplicationCommandOptionType.String)
-            .WithRequired(true)
+            .WithName("gettracks")
+            .WithDescription("Get user tracks.")
+            .AddOption("username", ApplicationCommandOptionType.String, "The username of the user.", true)
+            .WithType(ApplicationCommandOptionType.SubCommand)
+            .WithRequired(false)
     ];
     public override async Task ExecuteAsync(SocketSlashCommand command)
     {
-        var user = await LastFm.GetUserTracks((string)command.Data.Options.First().Value);
-        await command.RespondAsync(embed: EmbedResponse.GetListens(user));
+        var subCommand = command.Data.Options.First().Name;
+        switch (subCommand)
+        {
+            case "getuser":
+                var username = command.Data.Options.First().Options.First().Value.ToString();
+                var user = await LastFm.GetUserInfo(username);
+                await command.RespondAsync(embed: EmbedResponse.GetUserInfoEmbed(user));
+                break;
+            case "getartist":
+                var artistName = command.Data.Options.First().Options.First().Value.ToString();
+                var artist = await LastFm.GetArtistInfo(artistName);
+                await command.RespondAsync(embed: EmbedResponse.GetArtistInfoEmbed(artist));
+                break;
+            case "gettracks":
+                var usernameTracks = command.Data.Options.First().Options.First().Value.ToString();
+                var userTracks = await LastFm.GetUserTracks(usernameTracks);
+                await command.RespondAsync(embed: EmbedResponse.GetListensEmbed(userTracks));
+                break;
+        }
+
     }
 }
