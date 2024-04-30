@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
 
-namespace fmbrainz
+namespace fmbrainz.WebServices
 {
     internal class HttpService
     {
@@ -25,6 +26,33 @@ namespace fmbrainz
             var data = JsonConvert.DeserializeObject<T>(responseContent);
 
             return data;
+        }
+        public static void PrintJsonElements(string jsonString)
+        {
+            var jsonToken = jsonString.TrimStart().StartsWith("[") ? (JToken)JArray.Parse(jsonString) : JObject.Parse(jsonString);
+            PrintJsonElementsRecursive(jsonToken);
+        }
+
+        private static void PrintJsonElementsRecursive(JToken token, string prefix = "")
+        {
+            if (token is JValue value)
+            {
+                Console.WriteLine($"{prefix}: {value.Value}");
+            }
+            else if (token is JObject obj)
+            {
+                foreach (var property in obj.Properties())
+                {
+                    PrintJsonElementsRecursive(property.Value, $"{prefix}{(string.IsNullOrEmpty(prefix) ? "" : ".")}{property.Name}");
+                }
+            }
+            else if (token is JArray array)
+            {
+                for (int i = 0; i < array.Count; i++)
+                {
+                    PrintJsonElementsRecursive(array[i], $"{prefix}[{i}]");
+                }
+            }
         }
     }
 }
