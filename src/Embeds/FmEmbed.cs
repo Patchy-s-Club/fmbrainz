@@ -1,9 +1,8 @@
 using Discord;
-using Newtonsoft.Json.Linq;
 
-namespace fmbrainz;
+namespace fmbrainz.Embeds;
 
-public abstract class EmbedResponse
+public abstract class FmEmbed
 {
     public static Embed GetArtistInfoEmbed(dynamic artistInfo)
     {
@@ -20,7 +19,7 @@ public abstract class EmbedResponse
             .AddField("Tags", tags, false)
             .WithUrl(artistInfo.artist.url.ToString())
             .WithThumbnailUrl(artistInfo.artist.image[2]["#text"].ToString())
-            .WithColor(Color.Blue)
+            .WithColor(Color.Red)
             .Build();
     }
 
@@ -57,14 +56,6 @@ public abstract class EmbedResponse
         return embed.Build();
     }
 
-    public static Embed GetLbListensEmbed(dynamic listens)
-    {
-        var embed = new EmbedBuilder();
-        return embed.WithAuthor(listens[0].user_name.ToString())
-            .WithDescription($"**{listens[0].track_metadata.track_name.ToString()}** by **{listens[0].track_metadata.artist_name.ToString()}**")
-            .WithColor(Color.Purple)
-            .Build();
-    }
 
 
 }
