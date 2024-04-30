@@ -1,10 +1,11 @@
 using Discord;
+using Newtonsoft.Json.Linq;
 
 namespace fmbrainz;
 
 public abstract class EmbedResponse
 {
-    public static Embed GetArtistInfo(dynamic artistInfo)
+    public static Embed GetArtistInfoEmbed(dynamic artistInfo)
     {
         string tags = "";
         foreach (var tag in artistInfo.artist.tags.tag)
@@ -23,7 +24,7 @@ public abstract class EmbedResponse
             .Build();
     }
 
-    public static Embed GetUserInfo(dynamic userInfo)
+    public static Embed GetUserInfoEmbed(dynamic userInfo)
     {
         var embed = new EmbedBuilder()
             .WithTitle(userInfo.user.name.ToString())
@@ -40,10 +41,10 @@ public abstract class EmbedResponse
         return embed;
     }
 
-    public static Embed GetListens(dynamic tracks)
+    public static Embed GetListensEmbed(dynamic tracks)
     {
         var embed = new EmbedBuilder();
-        embed = tracks.recenttracks.track[0]["@attr"].nowplaying == "true"
+        embed = tracks.recenttracks.track[0]["@attr"] != null
             ? embed.WithAuthor("Currently listening to")
             : embed.WithAuthor("Last listened to");
 
@@ -55,4 +56,15 @@ public abstract class EmbedResponse
 
         return embed.Build();
     }
+
+    public static Embed GetLbListensEmbed(dynamic listens)
+    {
+        var embed = new EmbedBuilder();
+        return embed.WithAuthor(listens[0].user_name.ToString())
+            .WithDescription($"**{listens[0].track_metadata.track_name.ToString()}** by **{listens[0].track_metadata.artist_name.ToString()}**")
+            .WithColor(Color.Purple)
+            .Build();
+    }
+
+
 }
