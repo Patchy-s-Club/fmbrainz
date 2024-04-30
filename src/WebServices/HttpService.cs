@@ -7,13 +7,21 @@ namespace fmbrainz.WebServices
 {
     internal class HttpService
     {
-        private static readonly HttpClient client = new HttpClient();
-
-        public static async Task<T> GetResponse<T>(string token, string url,
+        private static readonly HttpClient client = new()
+        {
+            DefaultRequestHeaders =
+            {
+                UserAgent = { ProductInfoHeaderValue.Parse("fmbrainz/1.0") }
+            }
+        };
+        public static async Task<T> GetResponse<T>(string? token, string url,
             Dictionary<string, string>? parameters = null)
         {
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("api_key", token);
-
+            //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("api_key", token);
+            if (token != null)
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
             if (parameters != null)
             {
                 url = QueryHelpers.AddQueryString(url, parameters);
