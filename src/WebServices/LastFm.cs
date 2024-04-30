@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using Newtonsoft.Json;
 
-namespace fmbrainz
+namespace fmbrainz.WebServices
 {
     internal class LastFm
     {
@@ -12,31 +13,32 @@ namespace fmbrainz
 
         private static string baseUrl = "http://ws.audioscrobbler.com/2.0/?";
 
-        public static async Task<dynamic> GetArtistInfo(string artistName)
+        private static async Task<dynamic> CallApi(string method, Dictionary<string, string> parameters)
         {
-            string requestUrl = $"{baseUrl}method=artist.getinfo&artist={artistName}&api_key={token}&format=json";
+            parameters.Add("method", method);
+            parameters.Add("api_key", token);
+            parameters.Add("format", "json");
+
+            string requestUrl = QueryHelpers.AddQueryString(baseUrl, parameters);
             Console.WriteLine(requestUrl);
 
-            dynamic? artistInfo = await HttpService.GetResponse<dynamic>(token, requestUrl);
-            return artistInfo;
+            dynamic response = await HttpService.GetResponse<dynamic>(token, requestUrl);
+            return response;
+        }
+
+        public static async Task<dynamic> GetArtistInfo(string artistName)
+        {
+            return await CallApi("artist.getinfo", new Dictionary<string, string> { { "artist", artistName } });
         }
 
         public static async Task<dynamic> GetUserInfo(string username)
         {
-            string requestUrl = $"{baseUrl}method=user.getinfo&user={username}&api_key={token}&format=json";
-            Console.WriteLine(requestUrl);
-
-            dynamic userInfo = await HttpService.GetResponse<dynamic>(token, requestUrl);
-            return userInfo;
+            return await CallApi("user.getinfo", new Dictionary<string, string> { { "user", username } });
         }
 
         public static async Task<dynamic> GetUserTracks(string username)
         {
-            string requestUrl = $"{baseUrl}method=user.getrecenttracks&user={username}&api_key={token}&format=json";
-            Console.WriteLine(requestUrl);
-
-            dynamic userInfo = await HttpService.GetResponse<dynamic>(token, requestUrl);
-            return userInfo;
+            return await CallApi("user.getrecenttracks", new Dictionary<string, string> { { "user", username } });
         }
     }
 }
