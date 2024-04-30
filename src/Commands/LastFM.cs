@@ -1,5 +1,6 @@
 using Discord;
 using Discord.WebSocket;
+using fmbrainz.Embeds;
 using fmbrainz.WebServices;
 
 namespace fmbrainz.Commands;
@@ -38,17 +39,17 @@ public class lfm : Command
             case "getuser":
                 var username = command.Data.Options.First().Options.First().Value.ToString();
                 var user = await LastFm.GetUserInfo(username);
-                await command.RespondAsync(embed: EmbedResponse.GetUserInfoEmbed(user));
+                await command.RespondAsync(embed: FmEmbed.GetUserInfoEmbed(user));
                 break;
             case "getartist":
                 var artistName = command.Data.Options.First().Options.First().Value.ToString();
                 var artist = await LastFm.GetArtistInfo(artistName);
-                await command.RespondAsync(embed: EmbedResponse.GetArtistInfoEmbed(artist));
+                await command.RespondAsync(embed: FmEmbed.GetArtistInfoEmbed(artist));
                 break;
             case "gettracks":
                 var usernameTracks = command.Data.Options.First().Options.First().Value.ToString();
                 var userTracks = await LastFm.GetUserTracks(usernameTracks);
-                await command.RespondAsync(embed: EmbedResponse.GetListensEmbed(userTracks));
+                await command.RespondAsync(embed: FmEmbed.GetListensEmbed(userTracks));
                 break;
         }
 
