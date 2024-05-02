@@ -8,7 +8,7 @@ namespace fmbrainz.WebServices
         private static readonly HttpClient client = new HttpClient();
 
         // TODO: Move to configuration file
-        private static string? token = "c1616bd64079e4b46eecef513344da08";
+        private static string? token = "x";
         private static string secret = "x";
 
         private static string baseUrl = "http://ws.audioscrobbler.com/2.0/?";
@@ -20,9 +20,8 @@ namespace fmbrainz.WebServices
             parameters.Add("format", "json");
 
             string requestUrl = QueryHelpers.AddQueryString(baseUrl, parameters);
-            Console.WriteLine(requestUrl);
 
-            dynamic response = await HttpService.GetResponse<dynamic>(token, requestUrl);
+            dynamic response = await HttpService.GetResponse<dynamic>(requestUrl, token);
             return response;
         }
 

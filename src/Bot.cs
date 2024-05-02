@@ -15,7 +15,8 @@ namespace fmbrainz
         private static List<Command> commands = new List<Command>()
         {
             new lfm(),
-            new lb()
+            new lb(),
+            new GetArtist()
         };
 
         public static async Task Main()
@@ -64,7 +65,6 @@ namespace fmbrainz
             catch (HttpException exception)
             {
                 var json = JsonConvert.SerializeObject(exception.Errors, Formatting.Indented);
-                Console.WriteLine(json);
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using Discord;
+using fmbrainz.Models;
 
 namespace fmbrainz.Embeds;
 
@@ -14,24 +15,31 @@ public class BrainzEmbed
             .Build();
     }
 
-    public static Embed GetLbArtistEmbed(dynamic listens, string img)
+    public static Embed GetArtistEmbed(Artist artist)
     {
-        var embed = new EmbedBuilder();
-        var area = listens["begin-area"] == null
-            ? $"**{listens.area.name}**"
-            : $"**{listens["begin-area"]["name"]}, {listens.area.name}** ";
-        embed.WithTitle(listens.name.ToString())
-            .WithDescription("They are from " + area);
-        var tags = "";
-        foreach (var tag in listens.tags)
-        {
-            Console.WriteLine(tag.name);
-            tags += tags.Length > 0 ? $", {(string)tag.name}" : (string)tag.name;
-        }
+        var embed = new EmbedBuilder()
+            .WithTitle(artist.Name)
+            .WithDescription($"**{artist.Name}** is from {(artist.Area != null ? artist.Area : "somewhere on Earth..")}")
+            .AddField("Type", artist.Type, true)
+            .WithImageUrl(artist.Image)
+            .WithColor(Color.Purple);
 
-        return embed.AddField("Tags", tags)
-            .WithImageUrl(img)
-            .WithColor(Color.Purple)
-            .Build();
+        if (artist.Type == "Person")
+        {
+            if (artist.Gender != null)
+            {
+                embed.AddField("Gender", artist.Gender, true);
+            }
+
+            if (artist.Lived != null)
+            {
+                embed.AddField("Lived", artist.Lived, true);
+            }
+        }
+        embed.AddField("Genres", artist.Genres.Count > 0 ? string.Join(", ", artist.Genres) : "No tags", false);
+        embed.AddField("Listeners", artist.Listeners.ToString(), true);
+        embed.AddField("Play Count", artist.PlayCount.ToString(), true);
+        return embed.Build();
     }
+    
 }

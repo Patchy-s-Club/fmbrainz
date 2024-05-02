@@ -11,10 +11,10 @@ namespace fmbrainz.WebServices
         {
             DefaultRequestHeaders =
             {
-                UserAgent = { ProductInfoHeaderValue.Parse("fmbrainz/1.0") }
+                UserAgent = { ProductInfoHeaderValue.Parse("anonymous") }
             }
         };
-        public static async Task<T> GetResponse<T>(string? token, string url,
+        public static async Task<T> GetResponse<T>(string url, string? token = null,
             Dictionary<string, string>? parameters = null)
         {
             //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("api_key", token);
@@ -32,7 +32,7 @@ namespace fmbrainz.WebServices
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<T>(responseContent);
-
+            
             return data;
         }
         public static void PrintJsonElements(string jsonString)
