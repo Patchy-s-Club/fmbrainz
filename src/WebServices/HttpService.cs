@@ -27,12 +27,14 @@ namespace fmbrainz.WebServices
                 url = QueryHelpers.AddQueryString(url, parameters);
             }
 
+            Console.WriteLine($"Request URL: {url}");
+
             var response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<T>(responseContent);
-            
+    
             return data;
         }
         public static void PrintJsonElements(string jsonString)

@@ -57,7 +57,6 @@ namespace fmbrainz
                         builder.AddOption(option);
                     }
 
-                    await _client.Rest.DeleteAllGlobalCommandsAsync();
                     await _client.Rest.CreateGlobalCommand(builder.Build());
                     Console.WriteLine($"Command {command.Name} has been registered.");
                 }

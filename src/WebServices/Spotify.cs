@@ -4,7 +4,7 @@ namespace fmbrainz.WebServices;
 
 public class Spotify
 {
-    private static readonly string spotifyUrl = "https://api.spotify.com/v1/search";
+    private static readonly string spotifyUrl = "https://api.spotify.com/v1/";
 
     private static readonly HttpClient Client = new()
     {
@@ -21,32 +21,30 @@ public class Spotify
         return response.accessToken;
     }
 
-    public static async Task<dynamic> GetArtist(string artist)
+    private static async Task<dynamic> Search(string query, string type, string market, int limit)
     {
         string token = await GetToken();
         var parameters = new Dictionary<string, string>
         {
-            { "q", "artist:" + artist },
-            { "type", "artist" },
-            { "market", "US" },
-            { "limit", "1" }
+            { "q",  query },
+            { "type", type },
+            { "market", market },
+            { "limit", limit.ToString() }
         };
-        var response = await HttpService.GetResponse<dynamic>(spotifyUrl, token, parameters);
-        Console.WriteLine(response);
+        var response = await HttpService.GetResponse<dynamic>(spotifyUrl+"search", token, parameters);
+        return response;
+    }
+
+    public static async Task<dynamic> GetArtist(string artist)
+    {
+        var response = await Search(artist, "artist", "US", 1);
         return response.artists.items[0];
     }
 
-    public static async Task<dynamic> GetArtistImage(string artist)
+    public static async Task<dynamic> GetAlbum(string album)
     {
-        return (await GetArtist(artist)).images[0];
-    }
-    
-    public static async Task<string> GetArtistGenre(string artist)
-    {
-        var artistData = await Spotify.GetArtist(artist);
-        var genres = artistData.genres; // Assuming genres is the correct property name
-        string genresString = string.Join(", ", genres);
-        Console.WriteLine(genresString);
-        return genresString;
+        var response = await Search(album, "album", "US", 1);
+        string id = response.albums.items[0].id;
+        return await HttpService.GetResponse<dynamic>(spotifyUrl + $"albums/{id}", await GetToken());
     }
 };

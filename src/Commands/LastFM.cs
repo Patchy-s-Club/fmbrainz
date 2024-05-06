@@ -19,12 +19,6 @@ public class lfm : Command
             .AddOption("username", ApplicationCommandOptionType.String, "The username of the user.", true)
             .WithRequired(false),
         new SlashCommandOptionBuilder()
-            .WithName("getartist")
-            .WithDescription("Get artist.")
-            .WithType(ApplicationCommandOptionType.SubCommand)
-            .AddOption("artist", ApplicationCommandOptionType.String, "The name of the artist.", true)
-            .WithRequired(false),
-        new SlashCommandOptionBuilder()
             .WithName("gettracks")
             .WithDescription("Get user tracks.")
             .AddOption("username", ApplicationCommandOptionType.String, "The username of the user.", true)
@@ -40,11 +34,6 @@ public class lfm : Command
                 var username = command.Data.Options.First().Options.First().Value.ToString();
                 var user = await LastFm.GetUserInfo(username);
                 await command.RespondAsync(embed: FmEmbed.GetUserInfoEmbed(user));
-                break;
-            case "getartist":
-                var artistName = command.Data.Options.First().Options.First().Value.ToString();
-                var artist = await LastFm.GetArtistInfo(artistName);
-                await command.RespondAsync(embed: FmEmbed.GetArtistInfoEmbed(artist));
                 break;
             case "gettracks":
                 var usernameTracks = command.Data.Options.First().Options.First().Value.ToString();
